@@ -1,4 +1,4 @@
-#Tasks
+## Tasks
 1. Kreirati repozitorij
 2. Kreirati WPF app(.NET 8)
 3. Kreirati DB (MSSQL)- EF Core
