@@ -5,6 +5,10 @@ namespace Click2Rent.Domain
     public class User : BaseClass
     {
         public User(){}
+        public User(string username)
+        {
+            Username = username;
+        }
         public User(int id, string username)
         {
             Id= id;

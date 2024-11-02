@@ -40,27 +40,18 @@ namespace Click2Rent.Database
         //For table USERS only
         private void UseSoftDelete()
         {
-            foreach (var entry in ChangeTracker.Entries<User>())
+            var entries = ChangeTracker.Entries().ToList();
+            foreach (var entry in entries)
             {
                 switch (entry.State)
                 {
                     case EntityState.Added:
                         entry.CurrentValues["IsDeleted"] = false;
                         break;
-                    case EntityState.Unchanged:
-                        entry.State = EntityState.Unchanged;
-                        entry.CurrentValues["IsDeleted"] = false;
-                        break;
-                    case EntityState.Modified:
-                        entry.State = EntityState.Modified;
-                        entry.CurrentValues["IsDeleted"] = false;
-                        break;
+
                     case EntityState.Deleted:
                         entry.State = EntityState.Modified;
                         entry.CurrentValues["IsDeleted"] = true;
-                        break;
-                    default:
-                        entry.CurrentValues["IsDeleted"] = false;
                         break;
                 }
             }

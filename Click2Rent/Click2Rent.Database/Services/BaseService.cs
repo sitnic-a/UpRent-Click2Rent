@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 
 #pragma warning disable CS8604
+#pragma warning disable CS8603
 
 namespace Click2Rent.Database.Services
 {
@@ -14,33 +15,53 @@ namespace Click2Rent.Database.Services
             _contextFactory = contextFactory;
         }
 
-        public async Task<T> Add(T entity)
+        public T Add(T entity)
         {
             using (Click2RentContext _context = _contextFactory.CreateDbContext(args: []))
             {
-                var newRecord = await _context.Set<T>().AddAsync(entity);
-                await _context.SaveChangesAsync();
+                var newRecord = _context.Set<T>().Add(entity);
+                _context.SaveChanges();
                 return newRecord.Entity;
             }
         }
 
-        public async Task<T> Delete(int id)
+        public bool Delete(int id)
         {
             using (Click2RentContext _context = _contextFactory.CreateDbContext(args: []))
             {
-                var dbRecord = await _context.Set<T>().FindAsync(id);
-                var removed = _context.Set<T>().Remove(dbRecord);
-                await _context.SaveChangesAsync();
-                return removed.Entity;
+                var dbRecord = _context.Set<T>().FirstOrDefault(e => e.Id == id);
+                _context.Set<T>().Remove(dbRecord);
+                _context.SaveChanges();
+                return true;
             }
         }
 
-        public async Task<List<T>> GetAll()
+        public List<T> GetAll()
         {
             using (Click2RentContext _context = _contextFactory.CreateDbContext(args: []))
             {
-                var list = await _context.Set<T>().ToListAsync();
+                var list = _context.Set<T>().ToList();
                 return list;
+            }
+        }
+
+        public T GetById(int id)
+        {
+            using (Click2RentContext _context = _contextFactory.CreateDbContext(args: []))
+            {
+                var dbRecord = _context.Set<T>().FirstOrDefault(e => e.Id == id);
+                return dbRecord;
+            }
+        }
+
+        public T Update(int id, T Entity)
+        {
+            using (Click2RentContext _context = _contextFactory.CreateDbContext(args: []))
+            {
+                Entity.Id = id;
+                _context.Update(Entity);
+                _context.SaveChanges();
+                return Entity;
             }
         }
     }
