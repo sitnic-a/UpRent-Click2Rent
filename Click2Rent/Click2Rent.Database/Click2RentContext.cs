@@ -26,8 +26,55 @@ namespace Click2Rent.Database
             modelBuilder.Entity<User>().HasData(new User(1, "Admin"));
             modelBuilder.Entity<UserRole>().HasData(new UserRole(1, 1, 1));
 
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<User>()
+                .Property<bool>("IsDeleted")
+                .HasDefaultValue(false);
 
+            modelBuilder.Entity<User>()
+                .HasQueryFilter(user => EF.Property<bool>(user, "IsDeleted") == false);
+
+            base.OnModelCreating(modelBuilder);
+        }
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            UseSoftDelete();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            UseSoftDelete();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess,cancellationToken);
+        }
+
+        //For table USERS only
+        private void UseSoftDelete()
+        {
+            foreach (var entry in ChangeTracker.Entries<User>())
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        entry.CurrentValues["IsDeleted"] = false;
+                        break;
+                    case EntityState.Unchanged:
+                        entry.State = EntityState.Unchanged;
+                        entry.CurrentValues["IsDeleted"] = false;
+                        break;
+                    case EntityState.Modified:
+                        entry.State = EntityState.Modified;
+                        entry.CurrentValues["IsDeleted"] = false;
+                        break;
+                    case EntityState.Deleted:
+                        entry.State = EntityState.Modified;
+                        entry.CurrentValues["IsDeleted"] = true;
+                        break;
+                    default:
+                        entry.CurrentValues["IsDeleted"] = false;
+                        break;
+                }
+            }
         }
     }
 }
