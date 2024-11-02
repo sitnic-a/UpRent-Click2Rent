@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+#pragma warning disable CS8618
 
 namespace Click2Rent.Domain
 {
