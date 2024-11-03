@@ -35,11 +35,11 @@ namespace Click2Rent.WPFClient.ViewModel
             {
                 Username = u.Username,
                 CreatedDate = u.CreatedDate,
-                CreatedDateString = u.CreatedDate.ToString("dd/MM/yyyy hh:mm:ss"),
+                CreatedDateString = u.CreatedDate.ToString("dd/MM/yyyy hh:mm"),
                 CreatedByUserId = u.CreatedByUserId,
                 CreatedByUser = _userService.GetById(u.CreatedByUserId).Username,
                 ModifiedDate = u.ModifiedDate,
-                ModifiedDateString = u.ModifiedDate.ToString("dd/MM/yyyy hh:mm:ss"),
+                ModifiedDateString = u.ModifiedDate.ToString("dd/MM/yyyy hh:mm"),
                 ModifiedByUserId = u.ModifiedByUserId,
                 ModifiedByUser = ""
             }).ToList();
