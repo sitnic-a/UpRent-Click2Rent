@@ -1,22 +1,29 @@
 ﻿using Click2Rent.Database;
 using Click2Rent.Database.Services;
 using Click2Rent.Domain;
-using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 public class Program
 {
+    
     public static void Main(String[] args)
     {
-        IBaseService<User> _userService = new BaseService<User>(new Click2RentDbFactory());
-        var list = _userService.GetAll().Where(e => e.IsDeleted == true || e.IsDeleted == false).ToList();
+        IServiceProvider _serviceProvider = CreateServiceProvider();
+        var _context = _serviceProvider.GetRequiredService<Click2RentContext>();
+
+        IBaseService<User> _userService = new BaseService<User>(_context);
+
+        var list = _userService.GetAll();
         Console.WriteLine(":::BEFORE ADDING::");
         foreach (var item in list)
         {
             Console.WriteLine($"Item Id {item.Id} // Username {item.Username} // Created at {item.CreatedDate}");
         }
 
-        _userService.Add(new User("Admir"));
-        _userService.Add(new User("Dijana"));
+        _userService.Add(new User("Admir",1));
+        _userService.Add(new User("Dijana", 1));
+        _userService.Add(new User("Goku", 1));
 
         Console.WriteLine("\n:::AFTER ADDING::");
         list = _userService.GetAll();
@@ -36,7 +43,7 @@ public class Program
             Console.WriteLine($"Item Id {item.Id} // Username {item.Username} // Created at {item.CreatedDate}");
         }
 
-        var updated = _userService.Update(3, new User("Sabrina The Witch"));
+        var updated = _userService.Update(3, new User("Sabrina The Witch", 1));
         Console.WriteLine("\n:::AFTER UPDATING::");
 
         list = _userService.GetAll();
@@ -44,6 +51,19 @@ public class Program
         foreach (var item in list)
         {
             Console.WriteLine($"Item Id {item.Id} // Username {item.Username} // Created at {item.CreatedDate}");
+        }
+
+         IServiceProvider CreateServiceProvider()
+        {
+            IServiceCollection services = new ServiceCollection();
+
+            //Registering DB
+            services.AddDbContext<Click2RentContext>(options =>
+            {
+                options.UseSqlServer("Server=.;Database=Click2RentDB;Trusted_Connection=True;TrustServerCertificate=True;");
+            });
+
+            return services.BuildServiceProvider();
         }
     }
 }

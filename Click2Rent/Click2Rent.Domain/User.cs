@@ -5,14 +5,16 @@ namespace Click2Rent.Domain
     public class User : BaseClass
     {
         public User(){}
-        public User(string username)
+        public User(string username, int createdByUserId)
         {
             Username = username;
+            CreatedByUserId = createdByUserId;
         }
-        public User(int id, string username)
+        public User(int id, string username, int createdByUserId)
         {
             Id= id;
             Username= username;
+            CreatedByUserId= createdByUserId;
         }
 
         [MaxLength(100)]
