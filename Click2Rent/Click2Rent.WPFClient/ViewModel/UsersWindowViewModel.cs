@@ -29,6 +29,7 @@ namespace Click2Rent.WPFClient.ViewModel
 
         public ObservableCollection<VModels.User> Users { get; set; }
         public UsersWindowViewModel SelectedUser { get; set; }
+
         public RelayCommand AddUserCommand => new RelayCommand(_execute => AddUser());
         public RelayCommand DeleteUserCommand => new RelayCommand(_execute => DeleteUser(), _canExecute => SelectedUser != null);
 

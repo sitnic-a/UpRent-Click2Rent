@@ -6,6 +6,12 @@ namespace Click2Rent.Domain
     public class UserRole : BaseClass
     {
         public UserRole(){}
+
+        public UserRole(int userId, int roleId)
+        {
+            UserId = userId;
+            RoleId = roleId;
+        }
         public UserRole(int id, int userId, int roleId, string? comment = null)
         {
             Id = id;

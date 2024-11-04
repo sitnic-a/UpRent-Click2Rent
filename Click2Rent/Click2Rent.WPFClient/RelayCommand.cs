@@ -12,6 +12,7 @@ namespace Click2Rent.WPFClient
         private readonly Action<object> _execute;
         private readonly Func<object, bool> _canExecute;
 
+        public RelayCommand(Action<object> execute) : this(execute, canExecute: null) { }
         public RelayCommand(Action<object> execute, Func<object,bool> canExecute = null)
         {
             _execute = execute;
