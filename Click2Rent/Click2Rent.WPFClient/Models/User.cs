@@ -13,6 +13,11 @@
         public string ModifiedByUser { get; set; } = string.Empty;
 
         public User(){}
+        public User(string username, int createdByUserId)
+        {
+            Username = username;
+            CreatedByUserId = createdByUserId;
+        }
 
         public User(string username, DateTime createdDate, int createdByUserId, DateTime modifiedDate, int modifiedByUserId)
         {

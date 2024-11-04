@@ -1,5 +1,6 @@
 ﻿using Click2Rent.Database.Services;
 using Click2Rent.Domain;
+using Click2Rent.WPFClient.Views;
 using System.Collections.ObjectModel;
 using VModels = Click2Rent.WPFClient.Models;
 
@@ -10,6 +11,8 @@ namespace Click2Rent.WPFClient.ViewModel
     public class UsersWindowViewModel
     {
         private readonly IBaseService<User> _userService;
+        private readonly IBaseService<UserRole> _userRoleService;
+        private VModels.User LoggedUser = new VModels.User("Admin", 1);
 
         public UsersWindowViewModel(IBaseService<User> userService)
         {
@@ -17,7 +20,19 @@ namespace Click2Rent.WPFClient.ViewModel
             FillObservableCollection();
         }
 
+        public UsersWindowViewModel(IBaseService<User> userService, IBaseService<UserRole> userRoleService)
+        {
+            _userService = userService;
+            _userRoleService = userRoleService;
+            FillObservableCollection();
+        }
+
         public ObservableCollection<VModels.User> Users { get; set; }
+        public UsersWindowViewModel SelectedUser { get; set; }
+        public RelayCommand AddUserCommand => new RelayCommand(_execute => AddUser());
+        public RelayCommand DeleteUserCommand => new RelayCommand(_execute => DeleteUser(), _canExecute => SelectedUser != null);
+
+
 
         private List<User> GetUsers()
         {
@@ -52,6 +67,17 @@ namespace Click2Rent.WPFClient.ViewModel
             var dbUsers = GetUsers();
             var convertedUsers = Convert(dbUsers);
             Users = new ObservableCollection<VModels.User>(convertedUsers);
+        }
+
+        public void AddUser()
+        {
+            AddUserWindow userPage = new AddUserWindow(_userService,_userRoleService);
+            userPage.ShowDialog();
+        }
+
+        public void DeleteUser()
+        {
+            return;
         }
     }
 }

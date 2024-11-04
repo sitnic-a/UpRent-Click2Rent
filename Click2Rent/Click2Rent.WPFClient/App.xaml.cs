@@ -17,7 +17,8 @@ namespace Click2Rent.WPFClient
 
             Window window = new UsersWindow();
             IBaseService<User> _userService = _serviceProvider.GetRequiredService<IBaseService<User>>();
-            window.DataContext = new UsersWindowViewModel(_userService);
+            IBaseService<UserRole> _userRoleService = _serviceProvider.GetRequiredService<IBaseService<UserRole>>();
+            window.DataContext = new UsersWindowViewModel(_userService, _userRoleService);
             window.Show();
 
             base.OnStartup(e);
@@ -35,6 +36,7 @@ namespace Click2Rent.WPFClient
 
             //Registering services
             services.AddTransient<IBaseService<User>, BaseService<User>>();
+            services.AddTransient<IBaseService<UserRole>, BaseService<UserRole>>();
 
             services.AddScoped<UsersWindowViewModel>();
 
