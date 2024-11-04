@@ -9,7 +9,7 @@ namespace Click2Rent.Database
         public DbSet<User> Users { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
 
-        public Click2RentContext(){}
+        public Click2RentContext() { }
 
         public Click2RentContext(DbContextOptions<Click2RentContext> options) : base(options) { }
 
@@ -22,7 +22,12 @@ namespace Click2Rent.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Role>().HasData(new Role(1, "Administrator"));
+            modelBuilder.Entity<Role>().HasData(
+                new Role(1, "Administrator"),
+                new Role(2, "User"),
+                new Role(3, "Izvjestaji")
+                );
+
             modelBuilder.Entity<User>().HasData(new User(1, "Admin", 1));
             modelBuilder.Entity<UserRole>().HasData(new UserRole(1, 1, 1));
 
@@ -41,7 +46,7 @@ namespace Click2Rent.Database
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
         {
             UseSoftDelete();
-            return base.SaveChangesAsync(acceptAllChangesOnSuccess,cancellationToken);
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
         //For table USERS only
