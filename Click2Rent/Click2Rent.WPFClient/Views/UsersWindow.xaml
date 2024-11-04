@@ -80,6 +80,7 @@
                   Background="Transparent"
                   AutoGenerateColumns="False"
                   GridLinesVisibility="All"
+                  x:Name="dg_ListaKorisnika"
                   
                   >
             

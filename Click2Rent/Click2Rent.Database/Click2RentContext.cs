@@ -29,7 +29,7 @@ namespace Click2Rent.Database
                 );
 
             modelBuilder.Entity<User>().HasData(new User(1, "Admin", 1));
-            modelBuilder.Entity<UserRole>().HasData(new UserRole(1, 1, 1));
+            modelBuilder.Entity<UserRole>().HasData(new UserRole(id: 1, userId: 1, roleId:1, createdByUserId: 1, comment:""));
 
             modelBuilder.Entity<User>()
                 .HasQueryFilter(u => !u.IsDeleted);

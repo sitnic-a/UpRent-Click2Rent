@@ -104,6 +104,7 @@
                          Height="35"
                          BorderThickness="1.5" 
                          BorderBrush="Black"
+                         Width="160"
                          
                          />
             </StackPanel>

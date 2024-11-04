@@ -1,5 +1,6 @@
 ﻿using Click2Rent.Database.Services;
 using Click2Rent.Domain;
+using Click2Rent.WPFClient.Views;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -47,9 +48,9 @@ namespace Click2Rent.WPFClient.ViewModel
         public List<int> GetSelectedRoles()
         {
             if (UserRoleId == true)
-                Roles.Add(1);
-            if (AdminRoleId == true)
                 Roles.Add(2);
+            if (AdminRoleId == true)
+                Roles.Add(1);
             if (IzvjestajiRoleId == true)
                 Roles.Add(3);
 
@@ -79,28 +80,28 @@ namespace Click2Rent.WPFClient.ViewModel
         {
             if (!IsValid())
             {
-                MessageBox.Show("Ne more dalje!");
+                MessageBox.Show("Nije moguće nastaviti jer podaci nisu validni. Username i role moraju biti unešeni","Greška", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             var requestUser = new User(Username,LoggedUser.CreatedByUserId);
             var newUserRecord = _userService.Add(requestUser);
-            var selectedRoles = GetSelectedRoles();
 
-            if (newUserRecord == null || !selectedRoles.Any())
+            if (newUserRecord == null || !Roles.Any())
             {
                 MessageBox.Show("Ne more dalje!");
                 return;
             }
 
-            foreach (var role in selectedRoles)
+            foreach (var role in Roles)
             {
-                var newUserRoleRecord = new UserRole(newUserRecord.Id, role);
+                var newUserRoleRecord = new UserRole(newUserRecord.Id, role, LoggedUser.CreatedByUserId);
                 _userRoleService.Add(newUserRoleRecord);
-                MessageBox.Show("USPJESNO KREIRANO SVE!");
-                App.Current.Windows[1].Close();
             }
-            MessageBox.Show("Hvala, rokaj!");
-            return;
+            MessageBox.Show("USPJESNO KREIRANO SVE!");
+            App.Current.Windows[1].Close();
+            UsersWindow window = new UsersWindow();
+            window.DataContext = new UsersWindowViewModel(_userService, _userRoleService);
+            App.Current.MainWindow = window;
         }
         public bool IsValid()
         {

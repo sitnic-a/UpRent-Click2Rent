@@ -24,7 +24,7 @@ namespace Click2Rent.WPFClient.ViewModel
         {
             _userService = userService;
             _userRoleService = userRoleService;
-            FillObservableCollection();
+            Users = FillObservableCollection();
         }
 
         public ObservableCollection<VModels.User> Users { get; set; }
@@ -63,11 +63,11 @@ namespace Click2Rent.WPFClient.ViewModel
             return VMUsers;
         }
 
-        private void FillObservableCollection()
+        private ObservableCollection<VModels.User> FillObservableCollection()
         {
             var dbUsers = GetUsers();
             var convertedUsers = Convert(dbUsers);
-            Users = new ObservableCollection<VModels.User>(convertedUsers);
+            return new ObservableCollection<VModels.User>(convertedUsers);
         }
 
         public void AddUser()
