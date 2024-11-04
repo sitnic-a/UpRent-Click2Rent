@@ -101,7 +101,8 @@ namespace Click2Rent.WPFClient.ViewModel
             App.Current.Windows[1].Close();
             UsersWindow window = new UsersWindow();
             window.DataContext = new UsersWindowViewModel(_userService, _userRoleService);
-            App.Current.MainWindow = window;
+            App.Current.Windows[0].Close();
+            window.Show();
         }
         public bool IsValid()
         {

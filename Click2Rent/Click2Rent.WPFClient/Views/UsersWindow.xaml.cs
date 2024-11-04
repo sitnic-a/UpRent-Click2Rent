@@ -10,7 +10,6 @@ namespace Click2Rent.WPFClient.Views
         public UsersWindow()
         {
             InitializeComponent();
-            dg_ListaKorisnika.Items.Refresh();
         }
     }
 }
