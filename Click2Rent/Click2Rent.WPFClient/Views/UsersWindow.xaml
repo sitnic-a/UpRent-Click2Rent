@@ -79,15 +79,16 @@
                   CanUserResizeColumns="False"
                   Background="Transparent"
                   AutoGenerateColumns="False"
+                  IsReadOnly="True"
                   GridLinesVisibility="All"
-                  
+                  SelectionMode="Single"
+                  SelectedItem="{Binding SelectedUser}"
                   >
             
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Korisničko ime"
                                     Binding="{Binding Username}"
                                     Width="0.2*"
-                                    
                                     
                                     />
                 

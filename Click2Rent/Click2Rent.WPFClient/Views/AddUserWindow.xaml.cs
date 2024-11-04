@@ -22,6 +22,13 @@ namespace Click2Rent.WPFClient.Views
             DataContext = new AddUserWindowViewModel(LoggedUser, _userService,_userRoleService);
         }
 
+        public AddUserWindow(VModels.User selectedUser, IBaseService<UserRole> userRoleService)
+        {
+            InitializeComponent();
+            _userRoleService = userRoleService;
+            DataContext = new AddUserWindowViewModel(selectedUser, _userRoleService);
+        }
+
         //Ne radi ni ovaj pristup za konstantnu provjeru Validnosti podataka i mogucnost disable dugmeta
         private void CheckBox_Click(object sender, RoutedEventArgs e)
         {
