@@ -2,12 +2,9 @@
 using Click2Rent.Domain;
 using Click2Rent.WPFClient.Views;
 using Microsoft.IdentityModel.Tokens;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Input;
-using System.Windows.Navigation;
 using VModels = Click2Rent.WPFClient.Models;
 
 namespace Click2Rent.WPFClient.ViewModel
@@ -22,7 +19,9 @@ namespace Click2Rent.WPFClient.ViewModel
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public RelayCommand CloseCommand => new RelayCommand(_execute => CloseWindow());
+
         public RelayCommand SaveUserCommand => new RelayCommand(_execute => SaveUser());
+        public RelayCommand SaveAndExitCommand => new RelayCommand(_execute => SaveAndExit());
 
         public string Username { get; set; } = "Unesite korisničko ime";
         public string TempUsername { get; set; } = "Unesite korisničko ime";
@@ -37,6 +36,7 @@ namespace Click2Rent.WPFClient.ViewModel
 
         public VModels.User LoggedUser { get; set; } = new VModels.User();
         public VModels.User SelectedUser { get; set; } = new VModels.User();
+        public VModels.User UpdatedUser { get; set; } = new VModels.User();
 
 
 
@@ -112,75 +112,86 @@ namespace Click2Rent.WPFClient.ViewModel
         public void CloseWindow()
         {
             //Roles = GetSelectedRoles();
-            if (Username != TempUsername ||
-                UserRoleId != TempUserRoleId ||
-                AdminRoleId != TempAdminRoleId ||
-                IzvjestajiRoleId != TempIzvjestajiRoleId)
+            if (SelectedUser.Username.IsNullOrEmpty() || SelectedUser.Id <= 0)
+            {
+                if (!UpdatedUser.Username.IsNullOrEmpty() || UpdatedUser.Id > 0)
+                {
+                    if (IsChanged())
+                    {
+                        var result = MessageBox.Show("Vaše promjene će biti izgubljene ukoliko nastavite. Da li želite da snimite promjene?", "Info", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            SaveUser();
+                            return;
+                        }
+                        else if (result == MessageBoxResult.No)
+                        {
+                            App.Current.Windows[1].Close();
+                            return;
+                        }
+                    }
+                    App.Current.Windows[1].Close();
+                    return;
+                }
+
+                if (IsChanged())
+                {
+                    var result = MessageBox.Show("Vaše promjene će biti izgubljene ukoliko nastavite. Da li želite da snimite promjene?", "Info", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        SaveUser();
+                        return;
+                    }
+                    else if(result == MessageBoxResult.No)
+                    {
+                        App.Current.Windows[1].Close();
+                        return;
+                    }
+                }
+            }
+
+            if (IsChanged())
             {
                 var result = MessageBox.Show("Vaše promjene će biti izgubljene ukoliko nastavite. Da li želite da snimite promjene?", "Info", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
                     if (SelectedUser != null)
                     {
-                        var dbUser = _userService.GetById(SelectedUser.Id);
-                        if (dbUser != null)
-                        {
-                            
-                            dbUser.Username = Username;
-                            dbUser.ModifiedDate = DateTime.Now;
-                            dbUser.ModifiedByUserId = LoggedUser.Id;
 
-                            _userService.Update(dbUser.Id, dbUser);
-                            Roles.Clear();
-                            Roles = GetSelectedRoles();
-                            foreach (var role in Roles)
-                            {
-                                var newUserRoleRecord = new UserRole(dbUser.Id, role, LoggedUser.CreatedByUserId);
-                                _userRoleService.Add(newUserRoleRecord);
-                            }
-                            MessageBox.Show("Uspješno ste uredili podatke! Sad ćete biti preusmjereni na početak", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                            App.Current.Windows[1].Close();
-                            return;
-                        }
+                        UpdateUser(SelectedUser);
+                        return;     
                     }
                     SaveUser();
                     return;
                 }
+                App.Current.Windows[0].Close();
+                return;
             }
             App.Current.Windows[1].Close();
             return;
         }
 
+        public bool IsChanged()
+        {
+            return Username != TempUsername ||
+                UserRoleId != TempUserRoleId ||
+                AdminRoleId != TempAdminRoleId ||
+                IzvjestajiRoleId != TempIzvjestajiRoleId;
+        }
+
         public void SaveUser()
         {
+            UsersWindow window;
             if (!IsValid())
             {
                 MessageBox.Show("Nije moguće nastaviti jer podaci nisu validni. Username i role moraju biti unešeni", "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            if (SelectedUser != null)
+            if (!SelectedUser.Username.IsNullOrEmpty() || SelectedUser.Id > 0)
             {
-                var dbUser = _userService.GetById(SelectedUser.Id);
-                if (dbUser != null)
-                {
-
-                    dbUser.Username = Username;
-                    dbUser.ModifiedDate = DateTime.Now;
-                    dbUser.ModifiedByUserId = LoggedUser.Id;
-
-                    _userService.Update(dbUser.Id, dbUser);
-                    Roles.Clear();
-                    Roles = GetSelectedRoles();
-                    foreach (var role in Roles)
-                    {
-                        var newUserRoleRecord = new UserRole(dbUser.Id, role, LoggedUser.CreatedByUserId);
-                        _userRoleService.Add(newUserRoleRecord);
-                    }
-                    MessageBox.Show("Uspješno ste uredili podatke! Sad ćete biti preusmjereni na početak", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                    App.Current.Windows[1].Close();
-                    return;
-                }
+                UpdateUser(SelectedUser);
+                return;
             }
 
             var requestUser = new User(Username, LoggedUser.CreatedByUserId);
@@ -199,10 +210,52 @@ namespace Click2Rent.WPFClient.ViewModel
             }
             MessageBox.Show("Uspješno ste dodali korisnika! Sada ćete biti preusmjereni na početak aplikacije!", "Informacija", MessageBoxButton.OK, MessageBoxImage.Information);
             App.Current.Windows[1].Close();
+            window = new UsersWindow();
+            window.DataContext = new UsersWindowViewModel(_userService, _userRoleService);
+            App.Current.Windows[1].Topmost = true;
+            window.Show();
+            window.Topmost = false;
+            App.Current.Windows[0].Close();
+            return;
+        }
+
+        public void UpdateUser(VModels.User selectedUser)
+        {
+            Window window;
+            var dbUser = _userService.GetById(selectedUser.Id);
+            if (dbUser != null)
+            {
+
+                dbUser.Username = Username;
+                dbUser.ModifiedDate = DateTime.Now;
+                dbUser.ModifiedByUserId = LoggedUser.Id;
+
+                _userService.Update(dbUser.Id, dbUser);
+                UpdatedUser.Username = dbUser.Username;
+                Roles.Clear();
+                Roles = GetSelectedRoles();
+                foreach (var role in Roles)
+                {
+                    var newUserRoleRecord = new UserRole(dbUser.Id, role, LoggedUser.CreatedByUserId);
+                    _userRoleService.Add(newUserRoleRecord);
+                }
+                MessageBox.Show("Uspješno ste uredili podatke! Sad ćete biti preusmjereni na početak", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                window = new UsersWindow();
+                window.DataContext = new UsersWindowViewModel(_userService, _userRoleService);
+                App.Current.Windows[1].Topmost = true;
+                window.Show();
+                window.Topmost = false;
+                App.Current.Windows[0].Close();
+                return;
+            }
+        }
+
+        public void SaveAndExit()
+        {
+            SaveUser();
+            App.Current.Windows[0].Close();
             UsersWindow window = new UsersWindow();
             window.DataContext = new UsersWindowViewModel(_userService, _userRoleService);
-            App.Current.Windows[0].Close();
-            window.Show();
         }
         public bool IsValid()
         {

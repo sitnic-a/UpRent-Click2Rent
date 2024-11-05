@@ -64,7 +64,7 @@
             BorderThickness="1.5" 
             BorderBrush="Black"
             FontSize="14"
-            Command="{Binding DeleteUserCommand}"
+            Command="{Binding SaveAndExitCommand}"
             
             />
 
