@@ -6,7 +6,7 @@
         public int CreatedByUserId { get; set; }
         public int ModifiedByUserId { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
-        public DateTime ModifiedDate { get; set; } = DateTime.Now;
+        public DateTime ModifiedDate { get; set; }
         public bool Locked { get; set; }
         public bool Visible { get; set; } = true;
         public int Version { get; set; }

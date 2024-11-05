@@ -97,7 +97,7 @@ namespace Click2Rent.WPFClient.ViewModel
         {
             if (SelectedUser != null)
             {
-                AddUserWindow addUpdateUserWindow = new AddUserWindow(SelectedUser, _userRoleService);
+                AddUserWindow addUpdateUserWindow = new AddUserWindow(SelectedUser,_userService, _userRoleService);
                 addUpdateUserWindow.ShowDialog();
                 return;
             }

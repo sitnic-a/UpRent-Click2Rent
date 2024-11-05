@@ -35,15 +35,18 @@ namespace Click2Rent.WPFClient.ViewModel
         public bool TempAdminRoleId { get; set; }
         public bool TempIzvjestajiRoleId { get; set; }
 
-        public VModels.User LoggedUser { get; set; }
+        public VModels.User LoggedUser { get; set; } = new VModels.User();
+        public VModels.User SelectedUser { get; set; } = new VModels.User();
+
 
 
         public AddUserWindowViewModel() { }
 
-        public AddUserWindowViewModel(VModels.User selectedUser, IBaseService<UserRole> userRoleService)
+        public AddUserWindowViewModel(VModels.User selectedUser, VModels.User loggedUser,IBaseService<User> userService, IBaseService<UserRole> userRoleService)
         {
             Username = selectedUser.Username;
             TempUsername = Username;
+            _userService = userService;
             _userRoleService = userRoleService;
             _dbUserRoles = _userRoleService.GetAll()
                 .Select(ur => new UserRole
@@ -59,12 +62,24 @@ namespace Click2Rent.WPFClient.ViewModel
             foreach (var item in Roles)
             {
                 if (item == 1)
+                {
                     AdminRoleId = true;
+                    TempAdminRoleId = AdminRoleId;
+                }
+
                 if (item == 2)
+                {
                     UserRoleId = true;
+                    TempUserRoleId = UserRoleId;
+                }
                 if (item == 3)
+                {
                     IzvjestajiRoleId = true;
-            }   
+                    TempIzvjestajiRoleId = IzvjestajiRoleId;
+                }
+            }
+            SelectedUser = selectedUser;
+            LoggedUser = loggedUser;
         }
         public AddUserWindowViewModel(VModels.User loggedUser, IBaseService<User> userService, IBaseService<UserRole> userRoleService)
         {
@@ -74,7 +89,6 @@ namespace Click2Rent.WPFClient.ViewModel
             TempUserRoleId = UserRoleId;
             TempAdminRoleId = AdminRoleId;
             TempIzvjestajiRoleId = IzvjestajiRoleId;
-            Roles = GetSelectedRoles();
         }
 
         public List<int> GetSelectedRoles()
@@ -103,9 +117,38 @@ namespace Click2Rent.WPFClient.ViewModel
                 AdminRoleId != TempAdminRoleId ||
                 IzvjestajiRoleId != TempIzvjestajiRoleId)
             {
-                MessageBox.Show($"NIJE ISTI! IMA {Roles.Count} ROLA");
+                var result = MessageBox.Show("Vaše promjene će biti izgubljene ukoliko nastavite. Da li želite da snimite promjene?", "Info", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    if (SelectedUser != null)
+                    {
+                        var dbUser = _userService.GetById(SelectedUser.Id);
+                        if (dbUser != null)
+                        {
+                            
+                            dbUser.Username = Username;
+                            dbUser.ModifiedDate = DateTime.Now;
+                            dbUser.ModifiedByUserId = LoggedUser.Id;
+
+                            _userService.Update(dbUser.Id, dbUser);
+                            Roles.Clear();
+                            Roles = GetSelectedRoles();
+                            foreach (var role in Roles)
+                            {
+                                var newUserRoleRecord = new UserRole(dbUser.Id, role, LoggedUser.CreatedByUserId);
+                                _userRoleService.Add(newUserRoleRecord);
+                            }
+                            MessageBox.Show("Uspješno ste uredili podatke! Sad ćete biti preusmjereni na početak", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                            App.Current.Windows[1].Close();
+                            return;
+                        }
+                    }
+                    SaveUser();
+                    return;
+                }
             }
             App.Current.Windows[1].Close();
+            return;
         }
 
         public void SaveUser()
@@ -115,6 +158,31 @@ namespace Click2Rent.WPFClient.ViewModel
                 MessageBox.Show("Nije moguće nastaviti jer podaci nisu validni. Username i role moraju biti unešeni", "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+
+            if (SelectedUser != null)
+            {
+                var dbUser = _userService.GetById(SelectedUser.Id);
+                if (dbUser != null)
+                {
+
+                    dbUser.Username = Username;
+                    dbUser.ModifiedDate = DateTime.Now;
+                    dbUser.ModifiedByUserId = LoggedUser.Id;
+
+                    _userService.Update(dbUser.Id, dbUser);
+                    Roles.Clear();
+                    Roles = GetSelectedRoles();
+                    foreach (var role in Roles)
+                    {
+                        var newUserRoleRecord = new UserRole(dbUser.Id, role, LoggedUser.CreatedByUserId);
+                        _userRoleService.Add(newUserRoleRecord);
+                    }
+                    MessageBox.Show("Uspješno ste uredili podatke! Sad ćete biti preusmjereni na početak", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                    App.Current.Windows[1].Close();
+                    return;
+                }
+            }
+
             var requestUser = new User(Username, LoggedUser.CreatedByUserId);
             var newUserRecord = _userService.Add(requestUser);
 

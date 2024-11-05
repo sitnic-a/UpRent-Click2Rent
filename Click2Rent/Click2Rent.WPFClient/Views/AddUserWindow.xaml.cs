@@ -22,11 +22,12 @@ namespace Click2Rent.WPFClient.Views
             DataContext = new AddUserWindowViewModel(LoggedUser, _userService,_userRoleService);
         }
 
-        public AddUserWindow(VModels.User selectedUser, IBaseService<UserRole> userRoleService)
+        public AddUserWindow(VModels.User selectedUser,IBaseService<User> userService, IBaseService<UserRole> userRoleService)
         {
             InitializeComponent();
+            _userService = userService;
             _userRoleService = userRoleService;
-            DataContext = new AddUserWindowViewModel(selectedUser, _userRoleService);
+            DataContext = new AddUserWindowViewModel(selectedUser,LoggedUser,_userService, _userRoleService);
         }
 
         //Ne radi ni ovaj pristup za konstantnu provjeru Validnosti podataka i mogucnost disable dugmeta
